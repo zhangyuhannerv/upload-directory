@@ -1,0 +1,61 @@
+server:
+  port: 9555
+
+spring:
+  servlet:
+    multipart:
+      # 上传文件大小限制
+      max-file-size: 5120MB
+      max-request-size: 5120MB
+  datasource:
+    name: mysql-datasource
+    url: jdbc:mysql://localhost:10000/vip_file_manager?characterEncoding=UTF-8&useSSL=false
+    username: root
+    password: root
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+  jackson:
+    serialization:
+      write-dates-as-timestamps: true
+    default-property-inclusion: non_null
+
+# Mybatis Plus配置
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      # 全局默认主键类型
+      id-type: UUID
+      # 表名、是否使用下划线命名，默认数据库表使用下划线命名
+      table-underline: true
+      # 逻辑已删除值(默认为 1)
+      logic-delete-value: true
+      # 逻辑未删除值(默认为 0)
+      logic-not-delete-value: false
+  mapper-locations:
+    - /mapper/*.xml
+
+# 日志配置
+logging:
+  config: classpath:logback.xml
+
+# 分页插件配置
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countsql
+
+# Swagger配置
+swagger:
+  title: VIP-FILE-MANAGER Swagger API
+  description: 本地文件管理服务
+  version: 1.0.0
+
+# 文件配置
+file:
+  # 文件存储路径
+  save-path: /Users/zhangyuhan/Work/WorkProject/upload files
+  # 断点续传文件配置路径
+  conf-path: /Users/zhangyuhan/Work/WorkProject/upload files/conf
