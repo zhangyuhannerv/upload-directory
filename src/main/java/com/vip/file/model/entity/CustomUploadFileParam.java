@@ -5,5 +5,5 @@ import lombok.Data;
 
 @Data
 public class CustomUploadFileParam extends UploadFileParam {
-    private String filePath;
+    private String filePath = "";
 }

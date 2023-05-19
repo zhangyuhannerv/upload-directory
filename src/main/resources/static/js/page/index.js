@@ -164,20 +164,20 @@ $(function () {
             //动态改变div的宽度占比
             $('#' + file.id + ' .child').width('100%')
             $('#' + file.id + ' span').text('上传完成')
-            $.ajax({
-                type: 'post',
-                url: urls.server + '/api/file/add',
-                async: true,
-                contentType: 'application/json; charset=utf-8',
-                data: JSON.stringify({
-                    fileName: file.name,
-                    suffix: file.ext
-                }),
-                success: function () {
-                    // TODO 刷新文件列表，但是当文件过多时，页面交互表现得不太友好，所以这里自行使用
-                    // partialRefresh();
-                }
-            })
+            // $.ajax({
+            //     type: 'post',
+            //     url: urls.server + '/api/file/add',
+            //     async: true,
+            //     contentType: 'application/json; charset=utf-8',
+            //     data: JSON.stringify({
+            //         fileName: file.name,
+            //         suffix: file.ext
+            //     }),
+            //     success: function () {
+            //         // TODO 刷新文件列表，但是当文件过多时，页面交互表现得不太友好，所以这里自行使用
+            //         // partialRefresh();
+            //     }
+            // })
             delete filePathMap[file.__hash]
         },
         // 上传出错时执行
@@ -274,6 +274,7 @@ $(function () {
         }
     })
 
+
     const filePathMap = {}
 
     function hash(a) {
@@ -281,7 +282,6 @@ $(function () {
         return c
     }
 
-    /*测试js*/
     $("#fileFolder").change(function (e) {
         let files = this.files
         for (let j = 0, len = files.length; j < len; j++) {
@@ -294,5 +294,9 @@ $(function () {
             }
         }
         $(this).val('')
+    })
+
+    $("#addFolder").click(function () {
+        $("#fileFolder").click()
     })
 })
