@@ -15,4 +15,8 @@ public interface SysConstant {
      * 小文件最大大小: 2MB = 1024 * 1024 * 2
      */
     Long MAX_SIZE = 2097152L;
+    /**
+     * 文件夹类型
+     */
+    String DIR_TYPE = "dir";
 }

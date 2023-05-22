@@ -58,4 +58,4 @@ file:
   # 文件存储路径
   save-path: /Users/zhangyuhan/Work/WorkProject/upload files
   # 断点续传文件配置路径
-  conf-path: /Users/zhangyuhan/Work/WorkProject/upload files/conf
+  conf-path: /Users/zhangyuhan/Work/WorkProject/upload files/.conf

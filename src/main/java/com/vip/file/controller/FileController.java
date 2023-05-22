@@ -18,6 +18,7 @@ import com.vip.file.utils.InputStreamUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,9 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -47,6 +46,12 @@ import java.util.List;
 public class FileController {
 
     private final IFileService fileService;
+
+    @Value("${file.save-path:/data-center/files/vip-file-manager}")
+    private String savePath;
+    @Value("${file.conf-path:/data-center/files/vip-file-manager/conf}")
+    private String confFilePath;
+
 
     /**
      * 获取文件列表
@@ -155,6 +160,40 @@ public class FileController {
             String filename = (!EmptyUtils.basicIsEmpty(isSource) && isSource) ? fileDetails.getData().getFileName() : fileDetails.getData().getFilePath();
             inputStream = fileService.getFileInputStream(id);
             response.setHeader("Content-Disposition", "attachment;filename=" + EncodingUtils.convertToFileName(request, filename));
+            // 获取输出流
+            outputStream = response.getOutputStream();
+            IOUtils.copy(inputStream, outputStream);
+        } catch (IOException e) {
+            log.error("文件下载出错", e);
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 文件下载
+     *
+     * @param filePath 文件路径
+     * @param request
+     * @param response
+     */
+    @GetMapping(value = "/downloadFileByPath")
+    public void downloadFileByPath(String filePath, HttpServletRequest request, HttpServletResponse response) {
+        OutputStream outputStream = null;
+        InputStream inputStream = null;
+        try {
+            File file = new File(savePath + filePath);
+            inputStream = new FileInputStream(file);
+            response.setHeader("Content-Disposition", "attachment;filename=" + EncodingUtils.convertToFileName(request, file.getName()));
             // 获取输出流
             outputStream = response.getOutputStream();
             IOUtils.copy(inputStream, outputStream);

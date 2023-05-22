@@ -9,9 +9,6 @@ function refresh() {
  * 文件列表刷新
  */
 function partialRefresh() {
-    $('#fileList ul').html(
-        `<li class="fl-li" id="addFile"><img src="./img/添加.png"><label>添加文件</label></li>`
-    )
     $.ajax({
         type: 'get',
         url: urls.server + '/api/file/list',
@@ -26,7 +23,7 @@ function partialRefresh() {
                     if (file.fileName.length > 10) {
                         $('#fileList ul').append(
                             `<li class="fl-li"><i class="fileId">${
-                                file.id
+                                JSON.stringify(file)
                             }</i><img src="${getFileLogo(
                                 file.suffix
                             )}"><label>${file.fileName.substring(
@@ -34,17 +31,17 @@ function partialRefresh() {
                                 10
                             )}…</label><span class="tooltiptext">${
                                 file.fileName
-                            }<span style="color: red"> - 双击下载</span></span></li>`
+                            }-${timestampToDateTime(file.createdTime)}</span></li>`
                         )
                     } else {
                         $('#fileList ul').append(
                             `<li class="fl-li"><i class="fileId">${
-                                file.id
+                                JSON.stringify(file)
                             }</i><img src="${getFileLogo(file.suffix)}"><label>${
                                 file.fileName
                             }</label><span class="tooltiptext">${
                                 file.fileName
-                            }<span style="color: red"> - 双击下载</span></span></li>`
+                            }-${timestampToDateTime(file.createdTime)}</span></li>`
                         )
                     }
                 }
@@ -74,13 +71,26 @@ $(function () {
     $('.fl-li').mouseout(function () {
         $(this).children('span').css('display', 'none')
     })
-    /**
-     * 鼠标双击文件事件：下载
-     */
+
     $('body').on('dblclick', '.fl-li', function (e) {
-        let fileId = $(this).children('i').html()
-        window.open(urls.server + '/api/file/download/' + fileId)
+        let file = JSON.parse($(this).children('i').text())
+        if (!file) {
+            return
+        }
+        if (file.suffix === 'dir') {
+            alert('文件夹不支持下载')
+            return;
+        }
+        downloadFile(file.filePath)
     })
+
+    /**
+     * 文件下载
+     */
+    function downloadFile(filePath) {
+        window.open(urls.server + '/api/file/downloadFileByPath/?filePath=' + filePath)
+    }
+
     /**
      * 展开/收起进度条
      */
@@ -115,7 +125,7 @@ $(function () {
         fileQueued: (file) => {
             count++
             // 追加新数据
-            if (file.name.length > 10) {
+            /*if (file.name.length > 10) {
                 $('#fileList ul').append(
                     `<li class="fl-li"><i class="fileId">${
                         file.id
@@ -134,7 +144,7 @@ $(function () {
                         file.name
                     }</label></li>`
                 )
-            }
+            }*/
             $('#upcData').append(
                 `<li id="${file.id}"><p>${file.name}</p><div class="progress"><span></span>
 					<div class="child"></div></div></li>`
@@ -282,7 +292,18 @@ $(function () {
         return c
     }
 
-    $("#fileFolder").change(function (e) {
+
+    /**
+     * 点击图标触发隐藏的input点击
+     */
+    $("#addFolder").click(function (event) {
+        $("#fileFolder").click()
+    })
+
+    /**
+     * 文件夹上传
+     */
+    $("#fileFolder").change(function (event) {
         let files = this.files
         for (let j = 0, len = files.length; j < len; j++) {
             if (files[j].name !== ".DS_Store") {//过滤mac下面的 .DS_Store文件
@@ -294,9 +315,5 @@ $(function () {
             }
         }
         $(this).val('')
-    })
-
-    $("#addFolder").click(function () {
-        $("#fileFolder").click()
     })
 })

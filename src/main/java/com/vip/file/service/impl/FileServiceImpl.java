@@ -26,7 +26,11 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -51,8 +55,34 @@ public class FileServiceImpl implements IFileService {
     @Override
     public Result<List<GetFileDto>> getFileList(Integer pageNo, Integer pageSize) {
         PageHelper.startPage(pageNo, pageSize);
-        List<GetFileDto> result = filesMapper.selectFileList();
-        PageInfo<GetFileDto> pageInfo = new PageInfo<>(result);
+        File dir = new File(savePath);
+        File[] files = dir.listFiles();
+        List<GetFileDto> list = new ArrayList<>();
+        GetFileDto dto;
+        for (File file : files) {
+            if (file.getName().startsWith(".")) {
+                continue;
+            }
+
+            dto = new GetFileDto();
+            dto.setFilePath(file.getAbsolutePath().replace(savePath, ""));
+            dto.setFileName(file.getName());
+            if (file.isDirectory()) {
+                dto.setSuffix(SysConstant.DIR_TYPE);
+            } else {
+                dto.setSuffix(dto.getFileName().substring(dto.getFileName().lastIndexOf(".") + 1));
+            }
+
+            try {
+                BasicFileAttributes attrs = java.nio.file.Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+                dto.setCreatedTime(new Date(attrs.creationTime().toMillis()));
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+            }
+
+            list.add(dto);
+        }
+        PageInfo<GetFileDto> pageInfo = new PageInfo<>(list);
         return Results.newSuccessResult(pageInfo.getList(), "查询成功", pageInfo.getTotal());
     }
 
